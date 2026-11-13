@@ -1,6 +1,6 @@
 # r-aws-product-recommendation-engine
 
-[![ci-cd](https://github.com/OWNER/r-aws-product-recommendation-engine/actions/workflows/deploy.yml/badge.svg)](https://github.com/OWNER/r-aws-product-recommendation-engine/actions/workflows/deploy.yml)
+[![ci-cd](https://github.com/musanyaks/r-aws-product-recommendation-engine/actions/workflows/deploy.yml/badge.svg)](https://github.com/musanyaks/r-aws-product-recommendation-engine/actions/workflows/deploy.yml)
 [![R ≥ 4.4](https://img.shields.io/badge/R-%E2%89%A5%204.4-276DC3?logo=r&logoColor=white)](https://cran.r-project.org/)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker&logoColor=white)](Dockerfile)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
