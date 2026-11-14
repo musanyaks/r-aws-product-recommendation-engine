@@ -1,0 +1,74 @@
+# ============ R ============
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.Rapp.history
+*.Rout
+*.Rout.fail
+
+# ============ renv ============
+# COMMIT: renv.lock, .Rprofile, renv/activate.R, renv/settings.json
+# IGNORE: the actual package library — rebuilt by renv::restore()
+renv/library/
+renv/local/
+renv/cellar/
+renv/sandbox/
+renv/staging/
+renv/python/
+
+# ============ Data — never commit ============
+# Kaggle/Retailrocket: exceeds GitHub's 100MB file limit AND
+# redistribution violates the dataset's Kaggle terms
+data/raw/*
+data/processed/*
+data/sample/*.csv
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/sample/.gitkeep
+!data/sample/generate_sample_data.R
+
+# ============ Model artifacts — never commit ============
+# Trained models live in S3 (see models/README.md)
+models/*
+!models/README.md
+
+# ============ Secrets / credentials ============
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+kaggle.json
+.kaggle/
+.aws/
+
+# ============ Posit / Shiny deployment ============
+rsconnect/
+.secrets/
+
+# ============ OS / editors ============
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# ============ floci (local AWS emulator) ============
+# State/data directories — machine-local, regenerable
+.floci/
+floci-data/
+floci-state/
+floci-data*/
+
+# Emulator state files, if it persists via sqlite/db files
+*.floci
+*.db
+*.sqlite
+
+
+
+

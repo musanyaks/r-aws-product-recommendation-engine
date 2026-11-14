@@ -24,7 +24,9 @@ load_item_properties <- function(dir = config$data_raw) {
 load_category_tree <- function(dir = config$data_raw) {
   f <- file.path(dir, "category_tree.csv")
   if (file.exists(f)) fread(f) else NULL
-}library(data.table)
+}
+
+library(data.table)
 
 # Retailrocket schema: events.csv = timestamp,visitorid,event,itemid,transactionid
 # Timestamps are unix epoch *milliseconds*.

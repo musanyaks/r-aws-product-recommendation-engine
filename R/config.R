@@ -24,3 +24,4 @@ config$db <- list(
 
 config$api_key <- Sys.getenv("API_KEY", "dev-key-change-me")
 config$port    <- as.integer(Sys.getenv("PORT", "8000"))
+config$aws_endpoint <- Sys.getenv("AWS_ENDPOINT_URL", "")  # floci/LocalStack endpoint

@@ -1,0 +1,32 @@
+{
+  "family": "reco-api",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::ACCOUNT_ID:role/reco-task-role",
+  "containerDefinitions": [{
+    "name": "reco-api",
+    "image": "ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/reco-api:latest",
+    "portMappings": [{ "containerPort": 8000, "protocol": "tcp" }],
+    "environment": [
+      { "name": "MODEL_S3_URI", "value": "s3://BUCKET/models/model.rds" },
+      { "name": "DB_HOST", "value": "reco-db.XXXX.REGION.rds.amazonaws.com" },
+      { "name": "DB_NAME", "value": "reco" },
+      { "name": "DB_USER", "value": "reco" }
+    ],
+    "secrets": [
+      { "name": "DB_PASSWORD", "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:reco/db-password" },
+      { "name": "API_KEY",     "valueFrom": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:reco/api-key" }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/reco-api",
+        "awslogs-region": "REGION",
+        "awslogs-stream-prefix": "api"
+      }
+    }
+  }]
+}
