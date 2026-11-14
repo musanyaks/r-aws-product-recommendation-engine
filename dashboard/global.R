@@ -43,7 +43,4 @@ catalog <- list(
   n_feat   = sum(Matrix::rowSums(model$content_feats) > 0)
 )
 
-source(file.path(root, "dashboard", "ui.R"))
-source(file.path(root, "dashboard", "server.R"))
 
-shinyApp(ui, server)

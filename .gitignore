@@ -80,3 +80,4 @@ floci-data*/
 .Rproj.user/
 data/raw/
 .env
+.Rhistory
