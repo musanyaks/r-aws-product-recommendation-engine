@@ -15,6 +15,9 @@ ENV RENV_CONFIG_INSTALL_PARALLEL=FALSE \
 
 RUN R -e "options(Ncpus = 1); renv::restore(exclude = 'ggplot2')"
 RUN R -e "renv::restore(packages = 'ggplot2')"
+RUN R -e "install.packages(c('bs4Dash','plotly','DT'), repos='https://packagemanager.posit.co/cran/__linux__/jammy/latest')"
+
+RUN R -e "install.packages(c('bs4Dash','plotly','DT'), repos='https://packagemanager.posit.co/cran/__linux__/jammy/latest')"
 
 COPY R/ R/
 COPY dashboard/ dashboard/
