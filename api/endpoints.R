@@ -6,15 +6,14 @@ handle_health <- function() {
        uptime_seconds = as.numeric(difftime(Sys.time(), service$started_at, units = "secs")))
 }
 
-handle_recommendations <- function(user_id, n = 10, recent = NULL) {
-  n <- as.integer(n); if (is.na(n) || n < 1) n <- 10; n <- min(n, 100L)
-  recent_items <- if (!is.null(recent) && nzchar(recent)) strsplit(recent, ",")[[1]] else NULL
+handle_recommendations <- function(user_id, n = 10, recent = "") {
+  n <- suppressWarnings(as.integer(n)); if (is.na(n) || n < 1) n <- 10; n <- min(n, 100L)
+  recent_items <- if (nzchar(recent)) strsplit(recent, ",")[[1]] else NULL
   list(user_id = user_id,
        model_id = service$model_id,
        cold_start = !user_id %in% service$model$user_index,
        recommendations = recommend_items(service$model, user_id, recent_items, n))
 }
-
 handle_similar <- function(item_id, n = 10) {
   n <- as.integer(n); if (is.na(n) || n < 1) n <- 10
   list(item_id = item_id, similar = similar_items(service$model, item_id, n))

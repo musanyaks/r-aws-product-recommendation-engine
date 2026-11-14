@@ -1,19 +1,26 @@
+# Resolve endpoints.R relative to THIS file, not the working directory.
+this_file <- tryCatch(
+  normalizePath(sub("--file=", "", grep("--file=", commandArgs(FALSE), value = TRUE)[1])),
+  error = function(e) NULL
+)
+api_dir <- if (!is.null(this_file) && !is.na(this_file)) dirname(this_file) else "api"
+source(file.path(api_dir, "endpoints.R"))
 #* @apiTitle Product Recommendation API
 #* @apiDescription Hybrid CF + content-based + popularity recommendations from R.
-#* Handler logic lives in api/endpoints.R (loaded by run_api.R).
 
 #* API-key auth on everything except health/docs
 #* @filter auth
 function(req, res) {
   public <- c("/health", "/__docs__/", "/openapi.json")
-  if (any(startsWith(req$PATH_INFO, public))) return(forward())
-  if (!identical(req$HTTP_X_API_KEY, config$api_key)) {
+  is_public <- any(startsWith(req$PATH_INFO, public))
+
+  if (!is_public && !identical(req$HTTP_X_API_KEY, config$api_key)) {
     res$status <- 401L
     return(list(error = "missing or invalid API key"))
   }
-  forward()
-}
 
+  plumber::forward()
+}
 #* Health check
 #* @get /health
 function() handle_health()
@@ -21,7 +28,7 @@ function() handle_health()
 #* Personalized recommendations
 #* @param recent Optional comma-separated recently-viewed item ids (cold-start aid)
 #* @get /recommendations/<user_id>
-function(user_id, n = 10, recent = NULL) handle_recommendations(user_id, n, recent)
+function(user_id, n = 10, recent = "") handle_recommendations(user_id, n, recent)
 
 #* Similar products (content-based)
 #* @get /similar/<item_id>
