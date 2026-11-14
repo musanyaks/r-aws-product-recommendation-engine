@@ -2,7 +2,7 @@ FROM rocker/r-ver:4.4.1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       curl libcurl4-openssl-dev libssl-dev libsodium-dev libpq-dev \
-      libicu-dev libxml2-dev zlib1g-dev pkg-config \
+      libicu-dev libxml2-dev zlib1g-dev pkg-config libuv1-dev cmake \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -15,9 +15,7 @@ ENV RENV_CONFIG_INSTALL_PARALLEL=FALSE \
 
 RUN R -e "options(Ncpus = 1); renv::restore(exclude = 'ggplot2')"
 RUN R -e "renv::restore(packages = 'ggplot2')"
-RUN R -e "install.packages(c('bs4Dash','plotly','DT'), repos='https://packagemanager.posit.co/cran/__linux__/jammy/latest')"
 
-RUN R -e "install.packages(c('bs4Dash','plotly','DT'), repos='https://packagemanager.posit.co/cran/__linux__/jammy/latest')"
 
 COPY R/ R/
 COPY dashboard/ dashboard/

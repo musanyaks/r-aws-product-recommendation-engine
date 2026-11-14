@@ -3,7 +3,7 @@ FROM rocker/r-ver:4.4.1
 # System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
       curl libcurl4-openssl-dev libssl-dev libsodium-dev libpq-dev \
-      libicu-dev libxml2-dev zlib1g-dev pkg-config \
+      libicu-dev libxml2-dev zlib1g-dev pkg-config libuv1-dev cmake \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
