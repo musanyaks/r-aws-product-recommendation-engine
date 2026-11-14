@@ -1,0 +1,64 @@
+# ============ VCS ============
+.git/
+.github/
+.gitignore
+
+# ============ Data — never enters a build context ============
+# ~700MB of Kaggle CSVs; training reads from host/S3, not the image
+data/
+
+# ============ Model artifacts ============
+# Mounted at runtime / downloaded from S3 — never baked into an image
+models/
+
+# ============ renv local library — CRITICAL ============
+# These are Windows-compiled binaries. If they enter a Linux build
+# context, renv::restore() breaks or the image balloons by GBs.
+# The Dockerfile rebuilds packages from renv.lock inside the container.
+renv/library/
+renv/local/
+renv/cellar/
+renv/sandbox/
+renv/staging/
+renv/python/
+# NOTE: renv.lock, .Rprofile, renv/activate.R, renv/settings.json
+# must NOT be ignored — the Dockerfile COPYs them explicitly.
+
+# ============ Secrets / credentials ============
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+kaggle.json
+.kaggle/
+.aws/
+rsconnect/
+
+# ============ Runtime-irrelevant project files ============
+tests/
+run_tests.R
+README.md
+LICENSE
+aws/            # provisioning scripts run from host/CI, not in-container
+database/       # schema.sql is mounted into postgres by compose
+
+# ============ Docker & compose files ============
+Dockerfile
+Dockerfile.dashboard
+docker-compose.yml
+.dockerignore
+
+# ============ R session cruft ============
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+*.Rproj
+
+# ============ OS / editor ============
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

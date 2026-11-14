@@ -15,12 +15,15 @@ recommend_items <- function(model, user_id = NULL, recent_items = NULL, n = 10) 
   }
 
   known_recent <- intersect(as.character(recent_items), items)
-  cb_basis <- unique(c(items[seen_idx], known_recent))
-  if (length(cb_basis) > 0) {
-    b <- match(cb_basis, items)
+cb_basis <- unique(c(items[seen_idx], known_recent))
+if (length(cb_basis) > 0) {
+  b <- match(cb_basis, items)
+  # only compute CB if the basis actually has features — else it rescales to flat 0.5
+  if (any(Matrix::rowSums(model$content_feats[b, , drop = FALSE]) > 0)) {
     cb <- rescale01(as.vector(
       colMeans(model$content_feats[b, , drop = FALSE]) %*% t(model$content_feats)))
   }
+}
   if (length(known_recent)) seen_idx <- unique(c(seen_idx, match(known_recent, items)))
 
   score <- 0; wsum <- 0

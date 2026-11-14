@@ -1,0 +1,134 @@
+version: "3.9"
+
+services:
+
+  # ============ Database ============
+  postgres:
+    image: postgres:16
+    container_name: reco-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: reco
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-localpw}
+      POSTGRES_DB: reco
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed_data.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reco -d reco"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - reco-net
+
+  # ============ floci (AWS emulator) ============
+  floci:
+    image: ghcr.io/floci-io/floci:latest
+    container_name: reco-floci
+    restart: unless-stopped
+    ports:
+      - "4566:4566"
+    volumes:
+      - floci_data:/data
+      - ./aws/local/init.sh:/docker-entrypoint-initaws.d/init.sh:ro
+    environment:
+      - SERVICES=s3,secretsmanager
+      - DATA_DIR=/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - reco-net
+
+  # ============ Recommendation API ============
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reco-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=reco
+      - DB_USER=reco
+      - DB_PASSWORD=${DB_PASSWORD:-localpw}
+      - API_KEY=${API_KEY:-dev-key-change-me}
+      - MODEL_S3_URI=s3://reco-engine-local/models/model.rds
+      - AWS_ENDPOINT_URL=http://floci:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - ./models:/app/models:ro  # read-only mount for local model file fallback
+    depends_on:
+      postgres:
+        condition: service_healthy
+      floci:
+        condition: service_healthy
+    networks:
+      - reco-net
+    # Healthcheck: ensure the API responds
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  # ============ Shiny Dashboard ============
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: reco-dashboard
+    restart: unless-stopped
+    ports:
+      - "3838:3838"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=reco
+      - DB_USER=reco
+      - DB_PASSWORD=${DB_PASSWORD:-localpw}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    networks:
+      - reco-net
+
+  # ============ Optional: pgAdmin for DB inspection ============
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: reco-pgadmin
+    restart: unless-stopped
+    profiles:
+      - tools
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@reco.local
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - reco-net
+
+volumes:
+  postgres_data:
+  floci_data:
+
+networks:
+  reco-net:
+    driver: bridge

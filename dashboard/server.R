@@ -1,24 +1,51 @@
-library(ggplot2)
+# dashboard/server.R
 
-server <- function(input, output, session) {
-  recs <- eventReactive(input$go, {
-    req(model)
-    recommend_items(model, user_id = input$user, n = input$n)
-  })
-  output$recs    <- renderTable(recs())
-  output$recplot <- renderPlot(
-    ggplot(recs(), aes(reorder(itemid, score), score)) +
-      geom_col(fill = "#2c7fb8") + coord_flip() + labs(x = NULL))
-  output$popplot <- renderPlot({
-    req(model)
-    top <- data.table(itemid = model$item_index,
-                      pop = model$popularity)[order(-pop)][1:20]
-    ggplot(top, aes(reorder(itemid, pop), pop)) +
-      geom_col(fill = "#41ab5d") + coord_flip() + labs(x = NULL)
-  })
-  output$metrics <- renderPrint({ req(model); print(model$metrics$mean) })
-  output$registry <- renderTable({
-    req(!is.null(con))
-    DBI::dbGetQuery(con, "SELECT * FROM model_registry ORDER BY trained_at DESC LIMIT 20")
-  })
+# Robustly find project root by locating model.rds
+find_root <- function() {
+  path <- getwd()
+  for (i in 1:5) {
+    if (file.exists(file.path(path, "models", "model.rds"))) return(path)
+    path <- dirname(path)
+  }
+  stop("Could not find models/model.rds. Run from project root or a subdirectory.")
 }
+root <- find_root()
+
+# Source core R files with absolute paths
+source(file.path(root, "R", "utils.R"))
+source(file.path(root, "R", "config.R"))
+source(file.path(root, "R", "feature_engineering.R"))
+source(file.path(root, "R", "hybrid_model.R"))
+source(file.path(root, "R", "db.R"))
+
+model <- readRDS(file.path(root, "models", "model.rds"))
+
+con <- db_connect()
+
+catalog <- list(
+  n_users  = length(model$user_index),
+  n_items  = length(model$item_index),
+  n_inter  = sum(model$train_mat > 0),
+  density  = sum(model$train_mat > 0) / (length(model$user_index) * length(model$item_index)),
+  n_feat   = sum(Matrix::rowSums(model$content_feats) > 0)
+)
+
+# ---- The actual server logic ---------------------------------------------
+server <- function(input, output, session) {
+
+  # ---------- Overview ----------
+  output$vb_users   <- renderValueBox(valueBox(
+    format(catalog$n_users, big.mark = ","), "Users", icon = icon("users"), color = "blue"))
+  
+  # ... (all your render* blocks here) ...
+
+  output$ev_overtime <- renderPlotly({
+    req(ev_data())
+    d <- ev_data()[, .N, by = .(minute = as.POSIXct(cut(occurred_at, "hour")))]
+    p <- ggplot(d, aes(minute, N)) +
+      geom_line(color = "#756bb1") + geom_point() +
+      labs(x = NULL, y = "events") + theme_minimal()
+    ggplotly(p)
+  })
+  
+}  # ← Make sure this closing brace exists

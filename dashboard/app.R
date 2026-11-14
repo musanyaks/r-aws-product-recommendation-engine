@@ -1,15 +1,19 @@
-# Run from the repo root: shiny::runApp("dashboard")
-library(shiny)
-library(data.table)
+suppressPackageStartupMessages({
+  library(shiny); library(shinydashboard); library(data.table)
+  library(Matrix); library(ggplot2); library(DT); library(plotly); library(scales)
+})
 
-root <- normalizePath(file.path(getwd(), ".."), mustWork = FALSE)
-for (f in c("utils", "config", "hybrid_model", "db"))
-  source(file.path(root, "R", paste0(f, ".R")))
+# Find project root and set it as working directory
+find_root <- function() {
+  path <- getwd()
+  for (i in 1:5) {
+    if (file.exists(file.path(path, "models", "model.rds"))) return(path)
+    path <- dirname(path)
+  }
+  stop("Could not find models/model.rds")
+}
+setwd(find_root())
 
-model <- if (file.exists(file.path(root, "models", "model.rds")))
-  readRDS(file.path(root, "models", "model.rds")) else NULL
-con <- db_connect()
-
-source("ui.R")
-source("server.R")
+source("dashboard/ui.R")
+source("dashboard/server.R")
 shinyApp(ui, server)

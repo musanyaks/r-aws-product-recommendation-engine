@@ -15,6 +15,11 @@ logf("%d events | %d users | %d items",
 split  <- temporal_split(events, config$test_frac)
 logf("Train %d events | Test %d events | cutoff %s",
      nrow(split$train), nrow(split$test), split$cutoff)
+inter <- build_interactions(split$train, config$event_weights)
+# keep users/items with enough signal for factorization
+inter <- inter[, if (.N >= 2) .SD, by = visitorid]
+inter <- inter[, if (.N >= 3) .SD, by = itemid]
+mi <- build_rating_matrix(inter)
 
 mi    <- build_rating_matrix(build_interactions(split$train, config$event_weights))
 feats <- build_item_features(props, mi$items)

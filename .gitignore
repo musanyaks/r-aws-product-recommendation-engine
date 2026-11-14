@@ -68,7 +68,15 @@ floci-data*/
 *.floci
 *.db
 *.sqlite
+.env
 
 
 
 
+
+.RData
+.RDataTmp
+.Rhistory
+.Rproj.user/
+data/raw/
+.env
