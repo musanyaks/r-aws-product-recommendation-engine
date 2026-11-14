@@ -1,9 +1,9 @@
-ui <- bs4DashPage(
+ui <- dashboardPage(
   title = "Recommendation Engine",
   dark = TRUE,
   help = NULL,
   
-  header = bs4DashNavbar(
+  header = dashboardHeader(
     title = dashboardBrand(
       title = "Recommendation Engine",
       color = "primary",
@@ -14,32 +14,32 @@ ui <- bs4DashPage(
     status = "white"
   ),
   
-  sidebar = bs4DashSidebar(
+  sidebar = dashboardSidebar(
     skin = "dark",
     status = "primary",
     title = "Navigation",
     elevation = 3,
     
-    bs4SidebarMenu(
+    sidebarMenu(
       id = "tabs",
-      bs4SidebarMenuItem("Overview",       tabName = "overview", icon = icon("gauge-high")),
-      bs4SidebarMenuItem("Recommendations", tabName = "recs",     icon = icon("wand-magic-sparkles")),
-      bs4SidebarMenuItem("Catalog",        tabName = "catalog",  icon = icon("boxes-stacked")),
-      bs4SidebarMenuItem("Model Quality",  tabName = "quality",  icon = icon("chart-line")),
-      bs4SidebarMenuItem("Live Events",    tabName = "events",   icon = icon("bolt"))
+      menuItem("Overview",       tabName = "overview", icon = icon("gauge-high")),
+      menuItem("Recommendations", tabName = "recs",     icon = icon("wand-magic-sparkles")),
+      menuItem("Catalog",        tabName = "catalog",  icon = icon("boxes-stacked")),
+      menuItem("Model Quality",  tabName = "quality",  icon = icon("chart-line")),
+      menuItem("Live Events",    tabName = "events",   icon = icon("bolt"))
     )
   ),
   
-  body = bs4DashBody(
-    bs4TabItems(
+  body = dashboardBody(
+    tabItems(
       
       # ============== Overview ==============
-      bs4TabItem("overview",
+      tabItem("overview",
         fluidRow(
-          bs4ValueBoxOutput("vb_users",   width = 3),
-          bs4ValueBoxOutput("vb_items",   width = 3),
-          bs4ValueBoxOutput("vb_inter",   width = 3),
-          bs4ValueBoxOutput("vb_density", width = 3)
+          valueBoxOutput("vb_users",   width = 3),
+          valueBoxOutput("vb_items",   width = 3),
+          valueBoxOutput("vb_inter",   width = 3),
+          valueBoxOutput("vb_density", width = 3)
         ),
         
         fluidRow(
@@ -74,7 +74,7 @@ ui <- bs4DashPage(
       ),
       
       # ============== Recommendations ==============
-      bs4TabItem("recs",
+      tabItem("recs",
         fluidRow(
           bs4Card(
             title = "Query Parameters",
@@ -112,7 +112,7 @@ ui <- bs4DashPage(
       ),
       
       # ============== Catalog ==============
-      bs4TabItem("catalog",
+      tabItem("catalog",
         fluidRow(
           bs4Card(
             title = "Find Similar Items",
@@ -147,7 +147,7 @@ ui <- bs4DashPage(
       ),
       
       # ============== Model Quality ==============
-      bs4TabItem("quality",
+      tabItem("quality",
         fluidRow(
           bs4Card(
             title = "Current Model Metrics",
@@ -195,7 +195,7 @@ ui <- bs4DashPage(
       ),
       
       # ============== Live Events ==============
-      bs4TabItem("events",
+      tabItem("events",
         fluidRow(
           bs4Card(
             title = "Recent Interactions",
@@ -232,7 +232,7 @@ ui <- bs4DashPage(
     )
   ),
   
-  footer = bs4DashFooter(
+  footer = dashboardFooter(
     left = "Recommendation Engine v1.0",
     right = format(Sys.Date(), "%Y")
   )

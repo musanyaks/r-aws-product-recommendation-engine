@@ -1,8 +1,8 @@
 server <- function(input, output, session) {
   
   # ---------- Overview Tab ----------
-  output$vb_users <- renderbs4ValueBox({
-    bs4ValueBox(
+  output$vb_users <- renderValueBox({
+    valueBox(
       value = scales::comma(catalog$n_users),
       subtitle = "Users",
       icon = icon("users"),
@@ -11,8 +11,8 @@ server <- function(input, output, session) {
     )
   })
   
-  output$vb_items <- renderbs4ValueBox({
-    bs4ValueBox(
+  output$vb_items <- renderValueBox({
+    valueBox(
       value = scales::comma(catalog$n_items),
       subtitle = "Items",
       icon = icon("box"),
@@ -21,8 +21,8 @@ server <- function(input, output, session) {
     )
   })
   
-  output$vb_inter <- renderbs4ValueBox({
-    bs4ValueBox(
+  output$vb_inter <- renderValueBox({
+    valueBox(
       value = scales::comma(catalog$n_inter),
       subtitle = "Training Interactions",
       icon = icon("link"),
@@ -31,8 +31,8 @@ server <- function(input, output, session) {
     )
   })
   
-  output$vb_density <- renderbs4ValueBox({
-    bs4ValueBox(
+  output$vb_density <- renderValueBox({
+    valueBox(
       value = scales::percent(catalog$density, accuracy = 0.001),
       subtitle = "Matrix Density",
       icon = icon("border-all"),
