@@ -13,8 +13,8 @@ COPY renv/ renv/
 ENV RENV_CONFIG_INSTALL_PARALLEL=FALSE \
     RENV_CONFIG_CACHE_ENABLED=FALSE
 
-RUN R -e "options(Ncpus = 1); renv::restore()" \
- || R -e "options(Ncpus = 1); renv::restore()"
+RUN R -e "options(Ncpus = 1); renv::restore(exclude = 'ggplot2')"
+RUN R -e "renv::restore(packages = 'ggplot2')"
 
 COPY R/ R/
 COPY dashboard/ dashboard/

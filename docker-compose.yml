@@ -26,7 +26,7 @@ services:
 
   # ============ floci (AWS emulator) ============
   floci:
-    image: ghcr.io/floci-io/floci:latest
+    image: floci/floci:latest
     container_name: reco-floci
     restart: unless-stopped
     ports:

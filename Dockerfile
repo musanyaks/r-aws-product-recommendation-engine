@@ -19,8 +19,8 @@ ENV RENV_CONFIG_INSTALL_PARALLEL=FALSE \
     RENV_CONFIG_REPOS_OVERRIDE=https://packagemanager.posit.co/cran/__linux__/jammy/latest
 
 # Restore all packages (retry once to absorb the ggplot2/tibble ordering glitch)
-RUN R -e "options(Ncpus = 1); renv::restore()" \
- || R -e "options(Ncpus = 1); renv::restore()"
+RUN R -e "options(Ncpus = 1); renv::restore(exclude = 'ggplot2')"
+RUN R -e "renv::restore(packages = 'ggplot2')"
 
 # Application code (after the dependency layer so code edits don't rebuild it)
 COPY R/ R/
