@@ -1,9 +1,16 @@
 suppressPackageStartupMessages({
-  library(shiny); library(shinydashboard); library(data.table)
-  library(Matrix); library(ggplot2); library(DT); library(plotly); library(scales)
+  library(shiny)
+  library(bs4Dash)
+  library(data.table)
+  library(Matrix)
+  library(ggplot2)
+  library(plotly)
+  library(DT)
+  library(scales)
+  library(dplyr)
 })
 
-# Find project root and set it as working directory
+# Robustly find project root
 find_root <- function() {
   path <- getwd()
   for (i in 1:5) {
@@ -12,8 +19,31 @@ find_root <- function() {
   }
   stop("Could not find models/model.rds")
 }
-setwd(find_root())
+root <- find_root()
 
-source("dashboard/ui.R")
-source("dashboard/server.R")
+# Load core functions
+source(file.path(root, "R", "utils.R"))
+source(file.path(root, "R", "config.R"))
+source(file.path(root, "R", "feature_engineering.R"))
+source(file.path(root, "R", "hybrid_model.R"))
+source(file.path(root, "R", "db.R"))
+
+# Load model
+model <- readRDS(file.path(root, "models", "model.rds"))
+
+# Database connection (optional)
+con <- db_connect()
+
+# Catalog stats
+catalog <- list(
+  n_users  = length(model$user_index),
+  n_items  = length(model$item_index),
+  n_inter  = sum(model$train_mat > 0),
+  density  = sum(model$train_mat > 0) / (length(model$user_index) * length(model$item_index)),
+  n_feat   = sum(Matrix::rowSums(model$content_feats) > 0)
+)
+
+source(file.path(root, "dashboard", "ui.R"))
+source(file.path(root, "dashboard", "server.R"))
+
 shinyApp(ui, server)

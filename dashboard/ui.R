@@ -1,118 +1,239 @@
-library(DT)
-ui <- dashboardPage(
-  skin = "black",
-  dashboardHeader(title = "Recommendation Engine"),
-
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem("Overview",          tabName = "overview",  icon = icon("gauge")),
-      menuItem("Recommendations",   tabName = "recs",      icon = icon("wand-magic-sparkles")),
-      menuItem("Catalog",           tabName = "catalog",   icon = icon("boxes-stacked")),
-      menuItem("Model quality",     tabName = "quality",   icon = icon("chart-line")),
-      menuItem("Live events",       tabName = "events",    icon = icon("bolt"))
+ui <- bs4DashPage(
+  title = "Recommendation Engine",
+  dark = TRUE,
+  help = NULL,
+  
+  header = bs4DashNavbar(
+    title = dashboardBrand(
+      title = "Recommendation Engine",
+      color = "primary",
+      href = "#",
+      image = NULL
+    ),
+    skin = "dark",
+    status = "white"
+  ),
+  
+  sidebar = bs4DashSidebar(
+    skin = "dark",
+    status = "primary",
+    title = "Navigation",
+    elevation = 3,
+    
+    bs4SidebarMenu(
+      id = "tabs",
+      bs4SidebarMenuItem("Overview",       tabName = "overview", icon = icon("gauge-high")),
+      bs4SidebarMenuItem("Recommendations", tabName = "recs",     icon = icon("wand-magic-sparkles")),
+      bs4SidebarMenuItem("Catalog",        tabName = "catalog",  icon = icon("boxes-stacked")),
+      bs4SidebarMenuItem("Model Quality",  tabName = "quality",  icon = icon("chart-line")),
+      bs4SidebarMenuItem("Live Events",    tabName = "events",   icon = icon("bolt"))
     )
   ),
-
-  dashboardBody(
-    tags$head(tags$style(HTML("
-      .small-box h3 { font-size: 28px; }
-      .score-bar { font-family: monospace; }
-    "))),
-
-    tabItems(
-
-      # ---------------- Overview ----------------
-      tabItem("overview",
+  
+  body = bs4DashBody(
+    bs4TabItems(
+      
+      # ============== Overview ==============
+      bs4TabItem("overview",
         fluidRow(
-          valueBoxOutput("vb_users",   width = 3),
-          valueBoxOutput("vb_items",   width = 3),
-          valueBoxOutput("vb_inter",   width = 3),
-          valueBoxOutput("vb_density", width = 3)
+          bs4ValueBoxOutput("vb_users",   width = 3),
+          bs4ValueBoxOutput("vb_items",   width = 3),
+          bs4ValueBoxOutput("vb_inter",   width = 3),
+          bs4ValueBoxOutput("vb_density", width = 3)
         ),
+        
         fluidRow(
-          box(title = "Top trending items (popularity)", width = 6, status = "primary",
-              plotlyOutput("ov_pop", height = 350)),
-          box(title = "Content feature coverage", width = 6, status = "primary",
-              plotlyOutput("ov_feat", height = 350))
-        ),
-        fluidRow(
-          box(title = "Loaded model", width = 12, status = "info",
-              verbatimTextOutput("ov_model"))
-        )
-      ),
-
-      # ---------------- Recommendations ----------------
-      tabItem("recs",
-        fluidRow(
-          box(title = "Query", width = 3, status = "primary",
-              textInput("rec_user", "Customer ID", value = ""),
-              textInput("rec_recent", "Recent items (comma-sep, cold start)", value = ""),
-              numericInput("rec_n", "How many", 10, 1, 50),
-              actionButton("rec_go", "Recommend", class = "btn-primary", width = "100%"),
-              hr(),
-              verbatimTextOutput("rec_coldstart")
+          bs4Card(
+            title = "Top Trending Items",
+            width = 6,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            plotlyOutput("ov_pop", height = 400)
           ),
-          box(title = "Recommendations", width = 9, status = "primary",
-              DTOutput("rec_table"))
+          bs4Card(
+            title = "Content Feature Coverage",
+            width = 6,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            plotlyOutput("ov_feat", height = 400)
+          )
         ),
+        
         fluidRow(
-          box(title = "Score decomposition", width = 12, status = "info",
-              plotlyOutput("rec_decomp", height = 320))
+          bs4Card(
+            title = "Model Information",
+            width = 12,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            verbatimTextOutput("ov_model")
+          )
         )
       ),
-
-      # ---------------- Catalog ----------------
-      tabItem("catalog",
+      
+      # ============== Recommendations ==============
+      bs4TabItem("recs",
         fluidRow(
-          box(title = "Find an item", width = 3, status = "primary",
-              textInput("cat_item", "Item ID", value = ""),
-              numericInput("cat_n", "Similar items", 10, 1, 50),
-              actionButton("cat_go", "Find similar", class = "btn-primary", width = "100%")
+          bs4Card(
+            title = "Query Parameters",
+            width = 3,
+            elevation = 2,
+            closable = FALSE,
+            textInput("rec_user", "Customer ID", value = ""),
+            textInput("rec_recent", "Recent Items (comma-separated, for cold start)", value = ""),
+            numericInput("rec_n", "Number of Recommendations", 10, 1, 50),
+            actionButton("rec_go", "Get Recommendations", class = "btn-primary", width = "100%"),
+            hr(),
+            verbatimTextOutput("rec_coldstart")
           ),
-          box(title = "Similar items (content-based)", width = 9, status = "primary",
-              DTOutput("cat_table"))
+          
+          bs4Card(
+            title = "Recommendations",
+            width = 9,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            DTOutput("rec_table")
+          )
         ),
+        
         fluidRow(
-          box(title = "Popularity distribution (all items)", width = 12, status = "info",
-              plotlyOutput("cat_pophist", height = 300))
+          bs4Card(
+            title = "Score Decomposition",
+            width = 12,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            plotlyOutput("rec_decomp", height = 350)
+          )
         )
       ),
-
-      # ---------------- Model quality ----------------
-      tabItem("quality",
+      
+      # ============== Catalog ==============
+      bs4TabItem("catalog",
         fluidRow(
-          box(title = "Current model metrics", width = 6, status = "primary",
-              DTOutput("q_metrics")),
-          box(title = "vs popularity baseline", width = 6, status = "primary",
-              plotlyOutput("q_vs_baseline", height = 280))
+          bs4Card(
+            title = "Find Similar Items",
+            width = 3,
+            elevation = 2,
+            closable = FALSE,
+            textInput("cat_item", "Item ID", value = ""),
+            numericInput("cat_n", "Number of Similar Items", 10, 1, 50),
+            actionButton("cat_go", "Find Similar", class = "btn-primary", width = "100%")
+          ),
+          
+          bs4Card(
+            title = "Similar Items (Content-Based)",
+            width = 9,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            DTOutput("cat_table")
+          )
         ),
+        
         fluidRow(
-          box(title = "Metric distribution across evaluated users", width = 12, status = "info",
-              selectInput("q_metric", "Metric",
-                          choices = c("ndcg", "precision", "recall", "map"),
-                          selected = "ndcg"),
-              plotlyOutput("q_dist", height = 320))
-        ),
-        fluidRow(
-          box(title = "Training history (model registry)", width = 12, status = "warning",
-              DTOutput("q_registry"))
+          bs4Card(
+            title = "Popularity Distribution",
+            width = 12,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            plotlyOutput("cat_pophist", height = 350)
+          )
         )
       ),
-
-      # ---------------- Live events ----------------
-      tabItem("events",
+      
+      # ============== Model Quality ==============
+      bs4TabItem("quality",
         fluidRow(
-          box(title = "Recent interactions (from /feedback)", width = 12, status = "primary",
-              actionButton("ev_refresh", "Refresh", class = "btn-default"),
-              DTOutput("ev_table"))
+          bs4Card(
+            title = "Current Model Metrics",
+            width = 6,
+            elevation = 2,
+            closable = FALSE,
+            DTOutput("q_metrics")
+          ),
+          
+          bs4Card(
+            title = "Hybrid vs Popularity Baseline",
+            width = 6,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            plotlyOutput("q_vs_baseline", height = 300)
+          )
         ),
+        
         fluidRow(
-          box(title = "Events by type", width = 6, status = "info",
-              plotlyOutput("ev_bytype", height = 300)),
-          box(title = "Events over time", width = 6, status = "info",
-              plotlyOutput("ev_overtime", height = 300))
+          bs4Card(
+            title = "Metric Distribution Across Users",
+            width = 12,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            selectInput("q_metric", "Select Metric",
+                        choices = c("NDCG" = "ndcg", "Precision" = "precision",
+                                   "Recall" = "recall", "MAP" = "map"),
+                        selected = "ndcg"),
+            plotlyOutput("q_dist", height = 350)
+          )
+        ),
+        
+        fluidRow(
+          bs4Card(
+            title = "Model Training History",
+            width = 12,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            DTOutput("q_registry")
+          )
+        )
+      ),
+      
+      # ============== Live Events ==============
+      bs4TabItem("events",
+        fluidRow(
+          bs4Card(
+            title = "Recent Interactions",
+            width = 12,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            actionButton("ev_refresh", "Refresh", class = "btn-secondary"),
+            hr(),
+            DTOutput("ev_table")
+          )
+        ),
+        
+        fluidRow(
+          bs4Card(
+            title = "Events by Type",
+            width = 6,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            plotlyOutput("ev_bytype", height = 300)
+          ),
+          
+          bs4Card(
+            title = "Events Over Time",
+            width = 6,
+            elevation = 2,
+            closable = FALSE,
+            maximizable = TRUE,
+            plotlyOutput("ev_overtime", height = 300)
+          )
         )
       )
     )
+  ),
+  
+  footer = bs4DashFooter(
+    left = "Recommendation Engine v1.0",
+    right = format(Sys.Date(), "%Y")
   )
 )
