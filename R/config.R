@@ -17,9 +17,9 @@ config$test_frac      <- 0.15
 config$db <- list(
   host     = Sys.getenv("DB_HOST", ""),
   port     = as.integer(Sys.getenv("DB_PORT", "5432")),
-  dbname   <- Sys.getenv("DB_NAME", "reco"),
-  user     <- Sys.getenv("DB_USER", "reco"),
-  password <- Sys.getenv("DB_PASSWORD", "")
+  dbname   = Sys.getenv("DB_NAME", "reco"),
+  user     = Sys.getenv("DB_USER", "reco"),
+  password = Sys.getenv("DB_PASSWORD", "")
 )
 
 config$api_key <- Sys.getenv("API_KEY", "dev-key-change-me")
