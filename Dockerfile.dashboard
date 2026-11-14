@@ -1,17 +1,23 @@
 FROM rocker/r-ver:4.4.1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      libpq-dev libcurl4-openssl-dev libssl-dev libsodium-dev \
+      curl libcurl4-openssl-dev libssl-dev libsodium-dev libpq-dev \
+      libicu-dev libxml2-dev zlib1g-dev pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
 COPY renv.lock .Rprofile ./
 COPY renv/ renv/
-RUN R -e "renv::restore()"
+
+ENV RENV_CONFIG_INSTALL_PARALLEL=FALSE \
+    RENV_CONFIG_CACHE_ENABLED=FALSE
+
+RUN R -e "options(Ncpus = 1); renv::restore()" \
+ || R -e "options(Ncpus = 1); renv::restore()"
 
 COPY R/ R/
 COPY dashboard/ dashboard/
-COPY models/ models/
 
 EXPOSE 3838
 
